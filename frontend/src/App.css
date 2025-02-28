@@ -1,42 +1,137 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+body {
+  margin: 0;
+  padding: 0;
+}
+
+.page {
+  min-height: 100vh;
+  background-color: #000C18;
+  margin: 0;
+  color: white;
+  padding: 0;
+  font-family: "Inter", sans-serif;
+
+  background-image: url("/background.png"); 
+  background-size: cover;
+  background-position: center;
+  min-height: 100vh;
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+
+
+
+}
+
+header {
+  height: 5rem;
+  width: 100%;
+  margin: 0;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 3rem;
+  font-weight: bold;
+  color: rgb(248, 248, 139);
+}
+
+.main 
+{
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+.intro {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-top: 5rem;
+  gap: 30px;
+
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.about {
+  max-width: 40%;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+
+.about p {
+  margin-top: 3rem;
+  text-align: center;
+  font-size: medium;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.decorator {
+  color: rgb(54, 255, 47);
 }
 
-.card {
-  padding: 2em;
+.image {
+  background-image: url("/robot.png");
+  background-size: cover;
+  background-position: center;
+  height: 250px;
+  width: 250px;
+  opacity: 85%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
-.read-the-docs {
-  color: #888;
+form {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  margin-top: 4rem;
+}
+
+form input {
+  height: 2rem;
+  width: 25%;
+  background-color: #000C18;
+  color: wheat;
+  
+  border: solid white 1px;
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+}
+
+
+
+form button {
+  height: 2.3rem;
+  width: 7%;
+  text-align: center;
+  background-color: rgb(67, 67, 255);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  color: white;
+  font-size: medium;
+
+  border: solid rgb(67, 67, 255) 1px;
+}
+
+button:hover {
+  cursor: pointer;
+  opacity: 80%;
+}
+
+footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 4rem;
+  width: 100%;
+
+  font-size: smaller;
+  color: rgb(173, 173, 173);
 }
