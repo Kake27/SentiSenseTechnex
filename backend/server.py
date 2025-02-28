@@ -1,4 +1,5 @@
 from fastapi import FastAPI, BackgroundTasks
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from Instagram.instagramScraper import Instgram
 from Reddit.redditScraper import Reddit
@@ -7,6 +8,7 @@ from Twitter.twitterScraper import Twitter
 from transformers import pipeline
 import pandas as pd
 from dotenv import load_dotenv
+import os
 
 load_dotenv()
 
@@ -21,11 +23,19 @@ app.add_middleware(
 
 sent_pipeline = pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 status = {"processing": False, "comments_found": False, "file_created": False, "error": False}
+prev_url = ""
 
 
 def analyse(url):
     global status
+    global prev_url
+
+    prev_url = url
     status["processing"] = True
+
+    if(os.path.exists("comments.csv")):
+        os.remove("comments.csv")
+    
 
     try: 
         comments = []
@@ -46,6 +56,8 @@ def analyse(url):
             print("Invalid URL")
             status["error"] = "Invalid URL"
             return
+        
+        status["comments_found"] = True
 
         sentiments = []
         sentiment_labels = {
@@ -63,6 +75,7 @@ def analyse(url):
         df.to_csv("comments.csv", index=False)
 
         print("Sentiment Analysis Completed.")
+        status["file_created"] = True
 
     except:
         print("An error occurred")
@@ -86,8 +99,17 @@ async def get_analysis(url: str, background_tasks: BackgroundTasks):
     global status
     if status["processing"]:
         return {"message": "Process is already running"}
+    elif url == prev_url and os.path.exists("comments.csv"):
+        return {"file_created": True}
     
     background_tasks.add_task(analyse, url)
     return {"message": "Analysis Started"}
+
+
+@app.get("/getcsv")
+async def get_file():
+    if os.path.exists("comments.csv"):
+        return FileResponse("comments.csv", filename="output.csv", media_type="text/csv")
+    return {"error": "file not found"}
     
 

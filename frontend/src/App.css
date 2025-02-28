@@ -125,6 +125,47 @@ button:hover {
   opacity: 80%;
 }
 
+.table {
+  overflow-x: auto;
+  text-align: center;
+  color: rgb(190, 190, 190);
+}
+
+table {
+  max-width: 75%;
+  margin: auto;
+  border: solid white 1px;
+}
+
+thead {
+  background-color: #000C18;
+}
+
+th {
+  border: solid white 1px;
+  padding: 16px 8px;
+}
+
+tr {
+  border: solid white 1px;
+}
+
+td {
+  border: solid white 1px;
+  padding: 16px 8px;
+}
+.red {
+  color: rgb(255, 52, 52);
+}
+
+.green {
+  color: greenyellow;
+}
+
+.white {
+  color: white;
+}
+
 footer {
   display: flex;
   justify-content: center;
