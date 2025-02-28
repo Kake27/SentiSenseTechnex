@@ -26,3 +26,6 @@ dist-ssr
 .venv
 .env
 xcookies.json
+
+__pycache__
+__init__.py
