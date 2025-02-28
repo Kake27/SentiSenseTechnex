@@ -1,37 +1,46 @@
 import subprocess
-import os
-import csv
 import json
+import os
 
-url = "https://www.youtube.com/watch?v=HV82kA8AH0Q"
 
-subprocess.run([
-    "yt-dlp",
-    "--write-comments",
-    "--skip-download",
-    "-o", "%(id)s",
-    url
-])
+class Youtube:
+    def __init__(self):
+        pass
 
-video_id = url.split("v=")[-1]
-json_filename = f"{video_id}.info.json"
-csv_filename = f"{video_id}_comments.csv"
+    def get_comments(self, video_url):
+        subprocess.run([
+            "yt-dlp",
+            "--write-comments",
+            "--skip-download",
+            "-o", "%(id)s",
+            video_url
+        ])
 
-if os.path.exists(json_filename):
-    with open(json_filename, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    if "comments" in data:
-        comments = [comment["text"] for comment in data["comments"]]
+        video_id = video_url.split("v=")[-1]
+        json_filename = f"{video_id}.info.json"
+
+        if os.path.exists(json_filename):
+            with open(json_filename, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if "comments" in data:
+                comments = []
+                for comment in data["comments"]:
+                    comments.append(comment["text"].replace(",",""))
+
+                
+                os.remove(json_filename)
         
-        with open(csv_filename, "w", encoding="utf-8", newline='') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(["Comment"])
-            for comment in comments:
-                print(comment)
-                writer.writerow([comment])
-        print(f"Comments saved to {csv_filename}")
-        os.remove(json_filename)
-    else:
-        print("No comments found.")
-else:
-    print("JSON file not found. yt-dlp might not have extracted comments.")
+                return comments
+
+            else:
+                print("No comments found.")
+                return None
+
+        else:
+            print("JSON file not found. yt-dlp might not have extracted comments.")
+
+
+if __name__ == "__main__":
+    youtube = Youtube()
+    video_url = "https://www.youtube.com/watch?v=HV82kA8AH0Q"
+    commets = youtube.get_comments(video_url)
