@@ -34,7 +34,6 @@ class Clustering:
             sentiment_clusters[sentiment] = cluster_map
         
         json_output = json.dumps(sentiment_clusters, indent=4, ensure_ascii=False)
-        print(json_output)
 
         return json_output
 

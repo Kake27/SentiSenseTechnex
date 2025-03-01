@@ -3,7 +3,7 @@ import axios from "axios"
 import './App.css'
 import Papa from "papaparse"
 import { Bar, Pie } from "react-chartjs-2";
-import { Chart as ChartJS, ArcElement, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from "chart.js";
+import { Chart as ChartJS, ArcElement, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement, scales, Ticks } from "chart.js";
 
 ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title,Tooltip, Legend);
 
@@ -23,6 +23,11 @@ function App() {
   const [gotClusters, setGotClusters] = useState(false)
   const [showClusters, setClusters] = useState(false)
   const [clusterData, setClusterData] = useState([])
+
+  const [loadingSolns, setLoadingSolns] = useState(false)
+  const [gotSoln, setSolnStatus] = useState(false)
+  const [solnData, setSolnData] = useState({})
+  const [showSoln, setShowSoln] = useState(false)
 
   const analyse = async (e) => {
     e.preventDefault()
@@ -112,25 +117,31 @@ function App() {
     }
   }
 
-  const chartData = {
-    labels: Object.keys(graphData),
-    datasets: [
-      {
-        label: "Sentiment Count",
-        data: Object.values(graphData), 
-        backgroundColor: ["#FFBB28", "#FF4444", "#00C49F"],
-        borderColor: ["#E5A800", "#C62F2F", "#008C7E"],
-        borderWidth: 1,
-        color: "#FFFFFF"
-      },
-    ],
-  };
+const chartData = {
+  labels: Object.keys(graphData),
+  datasets: [
+    {
+      label: "Sentiment Count",
+      data: Object.values(graphData), 
+      backgroundColor: ["#FFBB28", "#FF4444", "#00C49F"],
+      borderColor: ["#E5A800", "#C62F2F", "#008C7E"],
+      borderWidth: 1,
+      color: "#FFFFFF"
+    },
+  ],
+};
 
   const options = {
     responsive: true,
+  
     plugins: {
-      legend: { position: "left" },
-      title: { text: "Sentiment Analysis" }
+      legend: { position: "top", labels: {color:"#ffffff"}},
+      title: { text: "Sentiment Analysis" },
+      
+      scales: {
+        x: {Ticks: {color: "#ffffff"}},
+        y: {Ticks: {color: "#ffffff"}}
+      }
     },
   };
 
@@ -169,8 +180,26 @@ function App() {
     } catch(err) {
       console.log("An error occured: " + err)
     }
-    
+  }
 
+  const getSolutions = async () => {
+    try {
+      setLoadingSolns(true)
+      const response = await axios.get("http://127.0.0.1:8000/solutions")
+
+      if(response.data.error) {
+        console.log("An error occurred")
+        return
+      }
+
+      setSolnData(response.data)
+      setSolnStatus(true)
+      setLoadingSolns(false)
+
+    } catch(err){
+      console.log(err)
+      setLoadingSolns(false)
+    }
   }
 
 
@@ -203,7 +232,7 @@ function App() {
             >{loading? "Analysing..." : "Analyse" }</button>
           </form>
 
-          <div className='analysis-status' hidden={!loading}>
+          <div className='analysis-status my-20' hidden={!loading}>
             {!gotComments && (
               <h3>Scraping Comments...</h3>
             )}
@@ -237,20 +266,31 @@ function App() {
                 </div>
                 
 
-                {gotClusters? 
+              {gotClusters? 
                 (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600 ml-10 rounded-lg'
                 onClick={() => setClusters(!showClusters)}>
                   Toggle Clusters
                 </button>) : 
-                (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600'
+                (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600 p-2'
                   onClick={getClusters}>
                     {loadingClusters ? "Analysing..." : "Analyse Clusters"}
                   </button>)}
+
+                {gotSoln ? 
+                  (<button className='border-2 h-[3rem] min-w-[7rem] border-blue-500 ml-10 '
+                    onClick={() => setShowSoln(!showSoln)}>
+                      Toggle Solns
+                    </button>) : 
+                    (<button className='border-2 h-[3rem] min-w-[7rem] border-blue-500'
+                      onClick={getSolutions}>
+                        {loadingSolns ? "Processing..." : "Get Solutions"}
+                      </button>)}
+
               </div> 
 
               {showTable && (
-                <div className="max-w-full w-full mx-auto overflow-x-auto text-center">
-                  <table className="w-3/4 max-w-full mx-auto table-fixed border border-white rounded-3xl">
+                <div className="w-full mx-auto text-center">
+                  <table className="w-4/5 mx-auto table-fixed border overflow-x-auto border-white rounded-3xl">
                     <thead className="bg-[#000C18]">
                       <tr>
                         {Object.keys(tableData[0]).map((key) => (
@@ -263,9 +303,9 @@ function App() {
                     <tbody>
                       {tableData.map((row, index) => (
                         <tr key={index}
-                        className="border border-white ">
+                        className="border border-white w-fit ">
                           {Object.values(row).map((cell, i) => (
-                            <td key={i} className={`border border-white px-4 py-2
+                            <td key={i} className={`border border-white px-4 py-2 overflow-auto
                               ${
                                 cell==="Positive" ?  "text-green-400" : cell==="Negative" ? "text-red-500" : "text-gray-300"
                               }`}>
@@ -293,24 +333,64 @@ function App() {
           )}
 
           {showClusters && (
-            <table className="overflow-x-auto text-center border-collapse border border-gray-300 w-3/4 my-10">
-            <thead>
-              <tr className="">
-                <th className="border border-gray-300 px-4 py-2">Sentiment</th>
-                {/* <th className="border border-gray-300 px-4 py-2">Cluster</th> */}
-                <th className="border border-gray-300 px-4 py-2">Comment</th>
-              </tr>
-            </thead>
-            <tbody>
-              {clusterData.map((row, index) => (
-                <tr key={index} className="">
-                  <td className="border border-gray-300 px-4 py-2">{row.sentiment}</td>
-                  {/* <td className="border border-gray-300 px-4 py-2">{row.cluster}</td> */}
-                  <td className="border border-gray-300 px-4 py-2">{row.comment}</td>
+             <div className="w-full max-w-[75vw] mx-auto overflow-hidden">
+             <table className="table-fixed mx-auto text-center border-collapse border border-gray-300 w-9/10 my-10">
+               <thead>
+                 <tr>
+                   <th className="border border-gray-300 px-4 py-2 break-words w-1/4">
+                     Sentiment
+                   </th>
+                   <th className="border border-gray-300 px-4 py-2 break-words w-3/4">
+                     Comment
+                   </th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {clusterData.map((row, index) => (
+                   <tr key={index}>
+                     <td className={`border border-gray-300 px-4 py-2 break-words whitespace-normal
+                      ${row.sentiment=="Positive" ? "text-green-400": 
+                        (row.sentiment=="Negative"? "text-red-500" : "text-white")}`}>
+                      
+                       {row.sentiment}
+                     </td>
+                     <td className="border border-gray-300 px-4 py-2 break-words whitespace-normal">
+                       {row.comment}
+                     </td>
+                   </tr>
+                 ))}
+               </tbody>
+             </table>
+           </div>
+          )}
+
+          {showSoln && (
+            <div className="overflow-x-auto w-3/4 mx-auto my-6">
+            <table className="table-auto border-collapse border border-gray-300 w-full">
+              <thead>
+                <tr className="">
+                  <th className="border border-gray-300 px-4 py-2">Category</th>
+                  <th className="border border-gray-300 px-4 py-2">Suggestions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {Object.entries(solnData).map(([category, suggestions], index) => (
+                  <tr key={index} className="">
+                    <td className="border border-gray-300 px-4 py-2 font-semibold">
+                      {category}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2">
+                      <ul className="list-disc pl-5">
+                        {suggestions.map((suggestion, i) => (
+                          <li key={i}>{suggestion}</li>
+                        ))}
+                      </ul>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           )}
 
         </div>

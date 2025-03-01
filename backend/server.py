@@ -6,10 +6,12 @@ from Reddit.redditScraper import Reddit
 from Youtube.youtubeScraper import Youtube
 from Twitter.twitterScraper import Twitter
 from clustering.clustering import Clustering
+from GeminiIntegration.genai import Genai
 from transformers import pipeline
 import pandas as pd
 from dotenv import load_dotenv
 import os
+import json
 
 load_dotenv()
 
@@ -24,7 +26,7 @@ app.add_middleware(
 
 sent_pipeline = pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 status = {"processing": False, "comments_found": False, "file_created": False, "error": False}
-prev_url = "https://www.youtube.com/watch?v=PUMMCLrVn8A"
+prev_url = "https://www.youtube.com/watch?v=h0ZMhhquL8c"
 
 
 def analyse(url):
@@ -36,7 +38,7 @@ def analyse(url):
 
     if(os.path.exists("comments.csv")):
         os.remove("comments.csv")
-    
+        status["file_created"] = False
 
     try: 
         comments = []
@@ -78,8 +80,8 @@ def analyse(url):
         print("Sentiment Analysis Completed.")
         status["file_created"] = True
 
-    except:
-        print("An error occurred")
+    except Exception as e:
+        print("An error occurred: " + str(e))
         status["error"] = True
         
     status["processing"] = False
@@ -129,10 +131,76 @@ async def get_cluster():
         df = pd.read_csv("comments.csv")
         clustering = Clustering()
         clusters = clustering.create_cluster(df)
-
+        
         return clusters
     
     return {"error": "File not found"}
+
+
+@app.get("/solutions")
+async def get_solutions():
+    try:
+        solution_data = ""
+        if(os.path.exists("comments.csv")):
+            df = pd.read_csv("comments.csv")
+            clustering = Clustering()
+            solution_data = clustering.create_cluster(df)
+
+        data = json.loads(solution_data)
+        formatted_output = ""
+
+        for sentiment, clusters in data.items():
+            formatted_output += f"\nSentiment: {sentiment.lower()}\n"
+            for cluster, comments in clusters.items():
+                formatted_output += f"Cluster {cluster}: {comments}\n"
+
+        # print(formatted_output)
+
+        genai = Genai()
+        solutions = genai.get_solutions(
+            prompt=
+            """
+             Analyze the following clusters of product reviews categorized by sentiment (neutral, negative, positive).
+
+            For each sentiment (neutral, negative, positive), provide bullet points (maximum 10 words for each bullet) for:
+            1. How to improve neutral sentiments.
+            2. How to minimize negative sentiments.
+            3. How to enhance positive sentiments.
+
+            Data: """ + formatted_output + 
+            """
+            Return: Provide only the bullet points for improving neutral reviews, minimizing negative reviews, and enhancing positive reviews. 
+            Always give the output in the format given here:
+            {
+                "How to improve neutral sentiments": [
+                    "Prompt engagement with questions about the content.",
+                    "Add visually stimulating elements to capture attention.",
+                    "Relate content to broader, interesting stories/movies.",
+                    "Provide more facts/interesting info to increase engagement."
+                ],
+                "How to minimize negative sentiments": [
+                    "Clearly explain the logic of events portrayed.",
+                    "Be realistic about chances for promotion participation.",
+                    "Ensure content is high quality and enjoyable.",
+                    "Avoid plot holes or confusing aspects in content."
+                ],
+                "How to enhance positive sentiments": [
+                    "Continue high animation/modeling quality.",
+                    "Show the process in behind-the-scenes videos.",
+                    "Expand the breadth of knowledge shared in videos.",
+                    "Encourage viewers to express feelings."
+                ]
+            }
+            """
+        )
+        print(solutions)
+        return solutions
+    except Exception as e:
+        print("Error occurred while fetching solutions: "+ str(e))
+        return {"error":"An error occurred while fetching solutions"}
+
+
+
 
 
     

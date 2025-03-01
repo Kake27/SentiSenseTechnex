@@ -8,10 +8,11 @@ load_dotenv()
 
 class Reddit:
     def __init__(self):
-        client_id=os.getenv("CLIENT_ID_REDDIT"),
-        client_secret=os.getenv("CLIENT_SECRET_REDDIT"),
-        username=os.getenv("USERNAME_REDDIT"),
+        client_id=os.getenv("CLIENT_ID_REDDIT")
+        client_secret=os.getenv("CLIENT_SECRET_REDDIT")
+        username=os.getenv("USERNAME_REDDIT")
         password=os.getenv("PASSWORD_REDDIT")
+        print(client_id)
 
         self.reddit = praw.Reddit(
             user_agent = True,
@@ -36,7 +37,7 @@ class Reddit:
                 print(f"Obtained {len(all_comments)} comments so far.")
 
             if len(all_comments) % 50 == 0:
-                time.sleep(randint(5, 8))
+                time.sleep(randint(2, 5))
 
         return all_comments
 
