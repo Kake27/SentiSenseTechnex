@@ -1,6 +1,15 @@
+@import "tailwindcss";
+@tailwind utilities;
+
 body {
   margin: 0;
   padding: 0;
+}
+
+.bg-custom {
+  background-image: url('/frontend/public/background.png');
+  background-size: cover;
+  background-position: center;
 }
 
 .page {
@@ -24,155 +33,17 @@ body {
 
 }
 
-header {
-  height: 5rem;
-  width: 100%;
-  margin: 0;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  font-size: 3rem;
-  font-weight: bold;
-  color: rgb(248, 248, 139);
-}
-
-.main 
-{
-  flex: 1;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.intro {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-top: 5rem;
-  gap: 30px;
-
-}
-.about {
-  max-width: 40%;
-}
-
-
-.about p {
-  margin-top: 3rem;
-  text-align: center;
-  font-size: medium;
-}
-
-.decorator {
-  color: rgb(54, 255, 47);
-}
-
-.image {
-  background-image: url("/robot.png");
-  background-size: cover;
-  background-position: center;
-  height: 250px;
-  width: 250px;
-  opacity: 85%;
-
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-form {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-
-  margin-top: 4rem;
-}
-
-form input {
-  height: 2rem;
-  width: 25%;
-  background-color: #000C18;
-  color: wheat;
-  
-  border: solid white 1px;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
-}
 
 
 
-form button {
-  height: 2.3rem;
-  width: 7%;
-  text-align: center;
-  background-color: rgb(67, 67, 255);
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
-  color: white;
-  font-size: medium;
 
-  border: solid rgb(67, 67, 255) 1px;
-}
+
+
 
 button:hover {
   cursor: pointer;
   opacity: 80%;
 }
 
-.table {
-  overflow-x: auto;
-  text-align: center;
-  color: rgb(190, 190, 190);
-}
 
-table {
-  max-width: 75%;
-  margin: auto;
-  border: solid white 1px;
-}
 
-thead {
-  background-color: #000C18;
-}
-
-th {
-  border: solid white 1px;
-  padding: 16px 8px;
-}
-
-tr {
-  border: solid white 1px;
-}
-
-td {
-  border: solid white 1px;
-  padding: 16px 8px;
-}
-.red {
-  color: rgb(255, 52, 52);
-}
-
-.green {
-  color: greenyellow;
-}
-
-.white {
-  color: white;
-}
-
-footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 4rem;
-  width: 100%;
-
-  font-size: smaller;
-  color: rgb(173, 173, 173);
-}

@@ -111,5 +111,15 @@ async def get_file():
     if os.path.exists("comments.csv"):
         return FileResponse("comments.csv", filename="output.csv", media_type="text/csv")
     return {"error": "file not found"}
+
+
+@app.get("/graphs")
+async def get_graph_data():
+    if(os.path.exists("comments.csv")):
+        df  = pd.read_csv("comments.csv")
+        sentiment_count = df["Sentiment"].value_counts().to_dict()
+        print(sentiment_count)
+        return sentiment_count
+    return {"error": "file not found"}
     
 

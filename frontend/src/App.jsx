@@ -2,14 +2,22 @@ import { useState } from 'react'
 import axios from "axios"
 import './App.css'
 import Papa from "papaparse"
+import { Bar, Pie } from "react-chartjs-2";
+import { Chart as ChartJS, ArcElement, Title, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from "chart.js";
+
+ChartJS.register(ArcElement, CategoryScale, LinearScale, BarElement, Title,Tooltip, Legend);
 
 function App() {
   const [url, setUrl] = useState("")
   const [loading, setLoading] = useState(false)
   const [fileCreated, setFileCreated] = useState(false)
   const [gotComments, setComments] = useState(false)
+
   const [tableData, setTableData] = useState([])
   const [showTable, setShowTable] = useState(false)
+
+  const [showGraph, setGraphStatus] = useState(false)
+  const [graphData, setGraphData] = useState({})
 
   const analyse = async (e) => {
     e.preventDefault()
@@ -82,63 +90,116 @@ function App() {
         },
       });
 
+      getGraphs()
 
     } catch(err) {
       console.log("Failed to fetch csv file: " + err)
     }
   }
 
+  const getGraphs = async () => {
+    try {
+      const graph = await axios.get("http://127.0.0.1:8000/graphs")
+      setGraphData(graph.data)
+      setGraphStatus(true)
+
+    } catch (err) {
+      console.log("Error drawing graphs: "+err)
+    }
+  }
+
+  const chartData = {
+    labels: Object.keys(graphData),
+    datasets: [
+      {
+        label: "Sentiment Count",
+        data: Object.values(graphData), 
+        backgroundColor: ["#FFBB28", "#FF4444", "#00C49F"],
+        borderColor: ["#E5A800", "#C62F2F", "#008C7E"],
+        borderWidth: 1,
+        color: "#FFFFFF"
+      },
+    ],
+  };
+
+  const options = {
+    responsive: true,
+    plugins: {
+      legend: { position: "left" },
+      title: { text: "Sentiment Analysis" }
+    },
+  };
+
 
   return (
     <>
-      <div className='page' >
-        <header>SentiSense</header>
+      <div className="flex  min-h-screen w-full bg-[#000C18] m-0 text-white p-0 
+      flex-col bg-[url('/background.png')] bg-no-repeat " >
+        <header className='flex justify-center text-center align-middle text-amber-200 text-5xl font-bold
+        mt-2'>SentiSense</header>
 
-        <div className='main'>
-          <div className='intro'>
-            <div className='about'>
-              <h1>Unlock the Power of <span className='decorator'>Sentiment Analysis</span></h1>
-              <p>Paste a link, and let us analyze the sentiments behind the comments!
+        <div className='flex flex-col justify-center items-center text-center flex-1'>
+          <div className='flex items-center justify-center mt-30 gap-8'>
+            <div className='max-w-[40%]'>
+              <h1 className='text-3xl font-bold mb-8'>Unlock the Power of 
+                <span className='text-green-300'> Sentiment Analysis</span></h1>
+              <p className='mt-12 text-center text-base'>Paste a link, and let us analyze the sentiments behind the comments!
                  Whether it's a video, social media post, or a reel, we break down emotions,
                 highlight key opinions, and give you valuable insights—instantly. 🚀</p>
             </div>
-            <div className='image'></div>
+
+            <div className="bg-[url('/robot.png')] bg-cover bg-center h-[250px] w-[250px] opacity-85 flex justify-center items-center text-center">
+            </div>
           </div>
-          <form onSubmit={analyse}>
-            <input type='text' onChange={(e) => setUrl(e.target.value)} placeholder='Enter post URL...' required/>
-            <button type='submit' disabled={loading}>{loading? "Analysing..." : "Analyse" }</button>
+
+          <form onSubmit={analyse} className="flex justify-center items-center text-center mt-16 w-[25rem]">
+            <input type='text' onChange={(e) => setUrl(e.target.value)} placeholder='Enter post URL...' required
+            className='h-9 w-4/5 bg-[#000C18] text-wheat border border-white rounded-tl-lg rounded-bl-lg px-2 focus:outline-none'/>
+            <button type='submit' disabled={loading}
+            className='h-[2.3rem] w-1/5 bg-blue-600 text-white text-base border border-blue-600 rounded-tr-lg rounded-br-lg'
+            >{loading? "Analysing..." : "Analyse" }</button>
           </form>
 
           <div className='analysis-status' hidden={!loading}>
             {!gotComments && (
               <h3>Scraping Comments...</h3>
             )}
-
             {!fileCreated && gotComments && (
               <h3>Analysing Comments...</h3>
             )}
           </div>
           
           {fileCreated && (
-            <div className='download-button'>
-              <h2>File is available to download!</h2>
+            <div className='my-4 '>
+              <h1 className='text-yellow-200 text-[1.2rem]'>File is available to download!</h1>
               <a href='http://127.0.0.1:8000/getcsv' download="output.csv">
-                <button>Download CSV File</button>
+                <button className='border-amber-300 border-2 h-8 w-40 my-2 rounded-4xl'>Download CSV File</button>
               </a>
             </div>
           )}
 
           {tableData.length > 0 ? (
             <div>
-              <button className="" onClick={() => setShowTable(!showTable)}>Toggle Table</button>
+              <div className='w-[70vw] my-6 mx-auto flex justify-items-start gap-0 align-middle text-center'>
+                <button className="border-green-600 border-2 rounded-tl-lg rounded-bl-lg  h-[3rem] w-[7rem]
+                py-auto bg-green-600"
+                onClick={() => setShowTable(!showTable)}>Toggle Table</button>
+
+                <button className='border-green-600 border-2 h-[3rem] w-[7rem] rounded-tr-lg rounded-br-lg 
+                text-center py-auto bg-green-600'
+                onClick={() => setGraphStatus(!showGraph)}>
+                  Show Graphs
+                </button>
+              </div>
+              
 
               {showTable && (
-                <div className="table-div">
-                <table className="">
-                  <thead className="">
+                <div className="overflow-x-auto text-center">
+                <table className="max-w-3/4 mx-auto border border-white rounded-3xl">
+                  <thead className="bg-[#000C18]">
                     <tr>
                       {Object.keys(tableData[0]).map((key) => (
-                        <th key={key} className="">
+                        <th key={key} className="border border-white rounded-3xl px-4 py-2">
                           {key}
                         </th>
                       ))}
@@ -147,11 +208,11 @@ function App() {
                   <tbody>
                     {tableData.map((row, index) => (
                       <tr key={index}
-                      className="">
+                      className="border border-white rounded-3xl">
                         {Object.values(row).map((cell, i) => (
-                          <td key={i} className={`
+                          <td key={i} className={`border border-white rounded-3xl  px-4 py-2
                             ${
-                              cell==="Positive" ?  "green" : cell==="Negative" ? "red" : "white"
+                              cell==="Positive" ?  "text-green-400" : cell==="Negative" ? "text-red-500" : "text-gray-300"
                             }`}>
                             {cell}
                           </td>
@@ -164,9 +225,22 @@ function App() {
               )}
             </div>
           ) : null}
-        </div>
 
-        <footer> © 2025 SentiSense.</footer>
+          {showGraph && (
+            <div className='flex justify-between items-center text-center gap-10'>
+              <div className='bar w-full h-full max-w-2xl max-h-2xl'>
+                <Bar data={chartData} options={options} />
+              </div>
+              <div className='pie w-full h-full max-w-2xl max-h-2xl'>
+                <Pie data={chartData} options={options} />
+              </div>
+            </div>
+          )}
+
+
+
+        </div>
+        <footer className='bg-[#000C18] text-center justi py-4 text-gray-400'> © 2025 SentiSense.</footer>
       </div>
     </>
   )
