@@ -6,39 +6,6 @@ body {
   padding: 0;
 }
 
-.bg-custom {
-  background-image: url('/frontend/public/background.png');
-  background-size: cover;
-  background-position: center;
-}
-
-.page {
-  min-height: 100vh;
-  background-color: #000C18;
-  margin: 0;
-  color: white;
-  padding: 0;
-  font-family: "Inter", sans-serif;
-
-  background-image: url("/background.png"); 
-  background-size: cover;
-  background-position: center;
-  min-height: 100vh;
-  width: 100%;
-
-  display: flex;
-  flex-direction: column;
-
-
-
-}
-
-
-
-
-
-
-
 
 button:hover {
   cursor: pointer;

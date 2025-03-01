@@ -5,6 +5,7 @@ from Instagram.instagramScraper import Instgram
 from Reddit.redditScraper import Reddit
 from Youtube.youtubeScraper import Youtube
 from Twitter.twitterScraper import Twitter
+from clustering.clustering import Clustering
 from transformers import pipeline
 import pandas as pd
 from dotenv import load_dotenv
@@ -23,7 +24,7 @@ app.add_middleware(
 
 sent_pipeline = pipeline("sentiment-analysis", model="cardiffnlp/twitter-roberta-base-sentiment")
 status = {"processing": False, "comments_found": False, "file_created": False, "error": False}
-prev_url = ""
+prev_url = "https://www.youtube.com/watch?v=PUMMCLrVn8A"
 
 
 def analyse(url):
@@ -118,8 +119,21 @@ async def get_graph_data():
     if(os.path.exists("comments.csv")):
         df  = pd.read_csv("comments.csv")
         sentiment_count = df["Sentiment"].value_counts().to_dict()
-        print(sentiment_count)
         return sentiment_count
     return {"error": "file not found"}
+
+
+@app.get("/clustering")
+async def get_cluster():
+    if(os.path.exists("comments.csv")):
+        df = pd.read_csv("comments.csv")
+        clustering = Clustering()
+        clusters = clustering.create_cluster(df)
+
+        return clusters
+    
+    return {"error": "File not found"}
+
+
     
 

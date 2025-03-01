@@ -19,6 +19,11 @@ function App() {
   const [showGraph, setGraphStatus] = useState(false)
   const [graphData, setGraphData] = useState({})
 
+  const [loadingClusters, setLoadCluster] = useState(false)
+  const [gotClusters, setGotClusters] = useState(false)
+  const [showClusters, setClusters] = useState(false)
+  const [clusterData, setClusterData] = useState([])
+
   const analyse = async (e) => {
     e.preventDefault()
     setLoading(true)
@@ -101,7 +106,6 @@ function App() {
     try {
       const graph = await axios.get("http://127.0.0.1:8000/graphs")
       setGraphData(graph.data)
-      setGraphStatus(true)
 
     } catch (err) {
       console.log("Error drawing graphs: "+err)
@@ -130,6 +134,45 @@ function App() {
     },
   };
 
+  const getClusters = async () => {
+    try{
+      setLoadCluster(true) 
+      const response = await axios.get("http://127.0.0.1:8000/clustering")
+      const data = JSON.parse(response.data)
+
+      if(response.error) {
+        console.log("An error occured while getting clusters!")
+        return 
+      }
+
+      console.log(data)
+      setLoadCluster(false)
+
+      const formattedData = [];
+
+      Object.entries(data).forEach(([sentiment, clusters]) => {
+        Object.entries(clusters).forEach(([cluster, comments]) => {
+          comments.forEach((comment, index) => {
+            formattedData.push({
+              sentiment,
+              cluster,
+              comment,
+            });
+          });
+        });
+      });
+
+      setClusterData(formattedData)
+
+      setGotClusters(true)
+
+    } catch(err) {
+      console.log("An error occured: " + err)
+    }
+    
+
+  }
+
 
   return (
     <>
@@ -154,9 +197,9 @@ function App() {
 
           <form onSubmit={analyse} className="flex justify-center items-center text-center mt-16 w-[25rem]">
             <input type='text' onChange={(e) => setUrl(e.target.value)} placeholder='Enter post URL...' required
-            className='h-9 w-4/5 bg-[#000C18] text-wheat border border-white rounded-tl-lg rounded-bl-lg px-2 focus:outline-none'/>
+            className='h-9 min-w-4/5 bg-[#000C18] text-wheat border border-white rounded-tl-lg rounded-bl-lg px-2 focus:outline-none'/>
             <button type='submit' disabled={loading}
-            className='h-[2.3rem] w-1/5 bg-blue-600 text-white text-base border border-blue-600 rounded-tr-lg rounded-br-lg'
+            className='h-[2.3rem] min-w-1/5 bg-blue-600 text-white text-base border border-blue-600 rounded-tr-lg rounded-br-lg'
             >{loading? "Analysing..." : "Analyse" }</button>
           </form>
 
@@ -173,7 +216,7 @@ function App() {
             <div className='my-4 '>
               <h1 className='text-yellow-200 text-[1.2rem]'>File is available to download!</h1>
               <a href='http://127.0.0.1:8000/getcsv' download="output.csv">
-                <button className='border-amber-300 border-2 h-8 w-40 my-2 rounded-4xl'>Download CSV File</button>
+                <button className='border-amber-300 border-2 h-8 w-40 my-2 rounded-2xl'>Download CSV File</button>
               </a>
             </div>
           )}
@@ -188,8 +231,18 @@ function App() {
                 <button className='border-green-600 border-2 h-[3rem] w-[7rem] rounded-tr-lg rounded-br-lg 
                 text-center py-auto bg-green-600'
                 onClick={() => setGraphStatus(!showGraph)}>
-                  Show Graphs
+                  Toggle Graphs
                 </button>
+
+                {gotClusters? 
+                (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600 ml-10'
+                onClick={() => setClusters(!showClusters)}>
+                  Toggle Clusters
+                </button>) : 
+                (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600'
+                  onClick={getClusters}>
+                    {loadingClusters ? "Analysing..." : "Analyse Clusters"}
+                  </button>)}
               </div>
               
 
@@ -235,6 +288,27 @@ function App() {
                 <Pie data={chartData} options={options} />
               </div>
             </div>
+          )}
+
+          {showClusters && (
+            <table className="table-auto border-collapse border border-gray-300 w-3/4 my-10">
+            <thead>
+              <tr className="">
+                <th className="border border-gray-300 px-4 py-2">Sentiment</th>
+                {/* <th className="border border-gray-300 px-4 py-2">Cluster</th> */}
+                <th className="border border-gray-300 px-4 py-2">Comment</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clusterData.map((row, index) => (
+                <tr key={index} className="">
+                  <td className="border border-gray-300 px-4 py-2">{row.sentiment}</td>
+                  {/* <td className="border border-gray-300 px-4 py-2">{row.cluster}</td> */}
+                  <td className="border border-gray-300 px-4 py-2">{row.comment}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           )}
 
 
