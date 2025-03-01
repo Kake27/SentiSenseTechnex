@@ -222,20 +222,23 @@ function App() {
           )}
 
           {tableData.length > 0 ? (
-            <div>
-              <div className='w-[70vw] my-6 mx-auto flex justify-items-start gap-0 align-middle text-center'>
-                <button className="border-green-600 border-2 rounded-tl-lg rounded-bl-lg  h-[3rem] w-[7rem]
-                py-auto bg-green-600"
-                onClick={() => setShowTable(!showTable)}>Toggle Table</button>
+            <div className=' w-full mx-auto flex flex-col justify-between align-middle text-center '>
+              <div className='w-3/4 my-6 mx-auto flex justify-between gap-0 align-middle text-center'>
+                <div className='flex justify-items-start'>
+                  <button className="border-green-600 border-2 rounded-tl-lg rounded-bl-lg  h-[3rem] w-[7rem]
+                  py-auto bg-green-600"
+                  onClick={() => setShowTable(!showTable)}>Toggle Table</button>
 
-                <button className='border-green-600 border-2 h-[3rem] w-[7rem] rounded-tr-lg rounded-br-lg 
-                text-center py-auto bg-green-600'
-                onClick={() => setGraphStatus(!showGraph)}>
-                  Toggle Graphs
-                </button>
+                  <button className='border-green-600 border-2 h-[3rem] w-[7rem] rounded-tr-lg rounded-br-lg 
+                  text-center py-auto bg-green-600'
+                  onClick={() => setGraphStatus(!showGraph)}>
+                    Toggle Graphs
+                  </button>
+                </div>
+                
 
                 {gotClusters? 
-                (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600 ml-10'
+                (<button className='border-2 h-[3rem] min-w-[7rem] border-green-600 ml-10 rounded-lg'
                 onClick={() => setClusters(!showClusters)}>
                   Toggle Clusters
                 </button>) : 
@@ -243,38 +246,37 @@ function App() {
                   onClick={getClusters}>
                     {loadingClusters ? "Analysing..." : "Analyse Clusters"}
                   </button>)}
-              </div>
-              
+              </div> 
 
               {showTable && (
-                <div className="overflow-x-auto text-center">
-                <table className="max-w-3/4 mx-auto border border-white rounded-3xl">
-                  <thead className="bg-[#000C18]">
-                    <tr>
-                      {Object.keys(tableData[0]).map((key) => (
-                        <th key={key} className="border border-white rounded-3xl px-4 py-2">
-                          {key}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {tableData.map((row, index) => (
-                      <tr key={index}
-                      className="border border-white rounded-3xl">
-                        {Object.values(row).map((cell, i) => (
-                          <td key={i} className={`border border-white rounded-3xl  px-4 py-2
-                            ${
-                              cell==="Positive" ?  "text-green-400" : cell==="Negative" ? "text-red-500" : "text-gray-300"
-                            }`}>
-                            {cell}
-                          </td>
+                <div className="max-w-full w-full mx-auto overflow-x-auto text-center">
+                  <table className="w-3/4 max-w-full mx-auto table-fixed border border-white rounded-3xl">
+                    <thead className="bg-[#000C18]">
+                      <tr>
+                        {Object.keys(tableData[0]).map((key) => (
+                          <th key={key} className="border border-white  px-4 py-2">
+                            {key}
+                          </th>
                         ))}
                       </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {tableData.map((row, index) => (
+                        <tr key={index}
+                        className="border border-white ">
+                          {Object.values(row).map((cell, i) => (
+                            <td key={i} className={`border border-white px-4 py-2
+                              ${
+                                cell==="Positive" ?  "text-green-400" : cell==="Negative" ? "text-red-500" : "text-gray-300"
+                              }`}>
+                              {cell}
+                            </td>
+                          ))}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               )}
             </div>
           ) : null}
@@ -291,7 +293,7 @@ function App() {
           )}
 
           {showClusters && (
-            <table className="table-auto border-collapse border border-gray-300 w-3/4 my-10">
+            <table className="overflow-x-auto text-center border-collapse border border-gray-300 w-3/4 my-10">
             <thead>
               <tr className="">
                 <th className="border border-gray-300 px-4 py-2">Sentiment</th>
@@ -310,8 +312,6 @@ function App() {
             </tbody>
           </table>
           )}
-
-
 
         </div>
         <footer className='bg-[#000C18] text-center justi py-4 text-gray-400'> © 2025 SentiSense.</footer>
