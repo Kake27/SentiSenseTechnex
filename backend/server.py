@@ -4,14 +4,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from Instagram.instagramScraper import Instgram
 from Reddit.redditScraper import Reddit
 from Youtube.youtubeScraper import Youtube
-from Twitter.twitterScraper import Twitter
+# from Twitter.twitterScraper import Twitter
 from clustering.clustering import Clustering
 from GeminiIntegration.genai import Genai
+from testing import SentimentAnalysis
 from transformers import pipeline
 import pandas as pd
 from dotenv import load_dotenv
 import os
 import json
+import asyncio
 
 load_dotenv()
 
@@ -43,9 +45,10 @@ def analyse(url):
     try: 
         comments = []
         if "x.com" in url:
-            scraper = Twitter()
-            id = url.split("/")[-1]
-            comments = scraper.tweet_by_id_run(id=id, min_replies=100)
+            print("Not supported")
+            # scraper = Twitter()
+            # id = url.split("/")[-1]
+            # comments = asyncio.run(scraper.get_tweet(id=id, min_comments=200))
         elif "reddit.com" in url:
             scraper = Reddit()
             comments = scraper.get_comments(url=url)
@@ -63,16 +66,17 @@ def analyse(url):
         status["comments_found"] = True
 
         sentiments = []
-        sentiment_labels = {
-            "LABEL_0": "Negative",
-            "LABEL_1": "Neutral",
-            "LABEL_2": "Positive"
-        }
+        # sentiment_labels = {
+        #     "LABEL_0": "Negative",
+        #     "LABEL_1": "Neutral",
+        #     "LABEL_2": "Positive"
+        # }
+
+        analyser = SentimentAnalysis()
 
         for comment in comments:
-            result = sent_pipeline(comment, truncation=True, max_length=512)
-            sentiment = result[0]["label"]
-            sentiments.append([comment, sentiment_labels[sentiment]])
+            sentiment = analyser.predict_class([comment])
+            sentiments.append([comment, sentiment])
 
         df = pd.DataFrame(sentiments, columns=["Comment", "Sentiment"])
         df.to_csv("comments.csv", index=False)
@@ -172,19 +176,19 @@ async def get_solutions():
             Return: Provide only the bullet points for improving neutral reviews, minimizing negative reviews, and enhancing positive reviews. 
             Always give the output in the format given here:
             {
-                "How to improve neutral sentiments": [
+                "Neutral": [
                     "Prompt engagement with questions about the content.",
                     "Add visually stimulating elements to capture attention.",
                     "Relate content to broader, interesting stories/movies.",
                     "Provide more facts/interesting info to increase engagement."
                 ],
-                "How to minimize negative sentiments": [
+                "Negative": [
                     "Clearly explain the logic of events portrayed.",
                     "Be realistic about chances for promotion participation.",
                     "Ensure content is high quality and enjoyable.",
                     "Avoid plot holes or confusing aspects in content."
                 ],
-                "How to enhance positive sentiments": [
+                "Positive": [
                     "Continue high animation/modeling quality.",
                     "Show the process in behind-the-scenes videos.",
                     "Expand the breadth of knowledge shared in videos.",

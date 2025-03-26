@@ -71,3 +71,5 @@ if __name__ == "__main__":
     url = "https://x.com/Shikhasingh2025/status/1895276676009074755"
     id = url.split("/")[-1]
     comments = asyncio.run(twitter.get_tweet(id=id, min_comments=100))
+    for comment in comments:
+        print(comment)

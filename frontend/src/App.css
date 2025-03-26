@@ -2,8 +2,6 @@
 @tailwind utilities;
 
 
-
-
 button:hover {
   cursor: pointer;
   opacity: 80%;

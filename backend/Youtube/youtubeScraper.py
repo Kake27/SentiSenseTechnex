@@ -29,7 +29,6 @@ class Youtube:
 
                 
                 os.remove(json_filename)
-        
                 return comments
 
             else:

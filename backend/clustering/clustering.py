@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
 class Clustering:
     def __init__(self):
         self.model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
@@ -36,9 +35,3 @@ class Clustering:
         json_output = json.dumps(sentiment_clusters, indent=4, ensure_ascii=False)
 
         return json_output
-
-
-        # for sentiment, clusters in sentiment_clusters.items():
-        #     print(f"\n🔹 Sentiment: {sentiment}")
-        #     for cluster_id, phrases in clusters.items():
-        #         print(f"   Cluster {cluster_id}: {phrases}")
